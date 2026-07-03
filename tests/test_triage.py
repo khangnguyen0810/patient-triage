@@ -1,4 +1,3 @@
-# tests/test_triage.py
 from src.triage_system.triage.service import TriageService
 
 
