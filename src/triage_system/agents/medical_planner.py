@@ -22,7 +22,7 @@ class MedicalPlannerAgent:
 
         for proc in procedures:
             explanation += f" - [ ] {proc}\n"
-            
+
         explanation += (
             "\nThese specific tests help our clinical specialists construct an accurate "
             "assessment. Please confirm these items and provide your insurance details to proceed."
