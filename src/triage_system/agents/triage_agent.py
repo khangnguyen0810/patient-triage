@@ -81,7 +81,7 @@ class TriageAgent:
             ):
                 tool_call_count += 1
                 if tool_call_count > self.max_tool_calls:
-                    break  # safety cap: bail out of the loop, fall back below
+                    break
             if event.is_final_response() and event.content and event.content.parts:
                 final_text = event.content.parts[0].text
         return final_text or ""

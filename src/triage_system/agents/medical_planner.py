@@ -1,30 +1,20 @@
 from triage_system.core.state import PatientSessionState
+from triage_system.tools.clinical_tool import ClinicalPackagesTool
+from google import genai
+from google.genai import types
 
 
 class MedicalPlannerAgent:
-    def __init__(self, clinical_tool):
+    def __init__(self, clinical_tool: ClinicalPackagesTool):
         self.clinical_tool = clinical_tool
 
-    def generate_proposals_explanation(self, state: PatientSessionState) -> str:
-        dept = state.selected_department
-        if not dept:
-            raise ValueError(
-                "State Error: Cannot propose medical plans without a selected_department."
-            )
-        procedures = self.clinical_tool.get_procedures_by_department(dept)
+    def propose_medical_plan(self, state: PatientSessionState) -> PatientSessionState:
+        if not state.selected_department:
+            raise ValueError("State Error: Cannot execute planner without a selected_department.")
+        state.proposed_procedures = self.clinical_tool.fetch_department_examination_packages(state.selected_department)
+        
 
-        state.proposed_procedures = procedures
+        
+        return state
+        
 
-        explanation = (
-            f"Based on your symptoms and registration in the *{dept}* department, "
-            f"the Medical Planner Agent recommends the following diagnostic items:\n"
-        )
-
-        for proc in procedures:
-            explanation += f" - [ ] {proc}\n"
-
-        explanation += (
-            "\nThese specific tests help our clinical specialists construct an accurate "
-            "assessment. Please confirm these items and provide your insurance details to proceed."
-        )
-        return explanation
