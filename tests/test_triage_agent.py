@@ -5,7 +5,7 @@ from src.triage_system.agents.triage_agent import TriageAgent
 
 def test_triage_agent_successfully_recommends_departments():
     initial_state = PatientSessionState(
-        patient_id="PT-2026",
+        patient_id="PT-2026-X",
         raw_symptoms=["I have sharp chest pain and my heart is beating fast"],
         selected_department=None,
     )
@@ -16,4 +16,4 @@ def test_triage_agent_successfully_recommends_departments():
 
     assert len(updated_state.recommended_departments) == 2
     assert "Cardiology" in updated_state.recommended_departments
-    assert updated_state.patient_id == "PT-2026"
+    assert updated_state.patient_id == "PT-2026-X"
