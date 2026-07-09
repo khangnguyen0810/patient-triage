@@ -18,7 +18,7 @@ def run_pipeline():
         patient_id="PT-2026-X",
         raw_symptoms=[
             "I have persistent stomach pain, severe cramps, and I feel nauseous after eating."
-        ],
+        ], # type: ignore
     )
 
     # 2. Wire Infrastructure & Inject Stateful Tools
@@ -94,8 +94,27 @@ def run_pipeline():
     print("\n========================================================")
     print("FINAL STRUCTURED TARGET OBJECT READY FOR TRANSMISSION TO FEA:")
     print("========================================================")
-    print(session_state.final_billing_payload.model_dump_json(indent=2))
+    print(session_state.final_billing_payload.model_dump_json(indent=2)) # type: ignore
     print("========================================================")
+
+    # Step 10: Presenting output metrics cleanly to user interface visualization
+    print("\n========================================================")
+    print("        PATIENT RECEIPT AND FINAL COST ESTIMATE SUMMARY  ")
+    print("========================================================")
+    print(f"Patient Tracking Reference: {session_state.patient_id}")
+    print(f"Target Department:          {session_state.selected_department}")
+    print(f"Carrier Network:            {session_state.final_billing_payload.insurance_provider if session_state.final_billing_payload else 'N/A'}")
+    print("--------------------------------------------------------")
+    print("Itemized Financial Breakdown Details:")
+    print(session_state.cost_estimation_breakdown)
+    if session_state.cost_estimation_breakdown:
+        for transaction_item, dollar_value in session_state.cost_estimation_breakdown.items():
+            print(f"  {transaction_item:<40}: ${dollar_value:>8.2f}")
+    print("--------------------------------------------------------")
+    print(f"FINAL PATIENT OUT-OF-POCKET ESTIMATE:        ${session_state.final_out_of_pocket_cost:>8.2f}")
+    print("========================================================")
+
+
 
 if __name__ == "__main__":
     run_pipeline()
