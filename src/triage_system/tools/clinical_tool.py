@@ -3,12 +3,11 @@ from triage_system.core.state import PatientSessionState
 
 
 class ClinicalPackagesTool:
-    def __init__(self, state: PatientSessionState):
+    def __init__(self):
         """
         Injects the session state so that when Gemini triggers this tool,
         the retrieved items are simultaneously tracked in our state system.
         """
-        self.state = state
         self._package_db = {
             "Cardiology": [
                 "Electrocardiogram (ECG)",

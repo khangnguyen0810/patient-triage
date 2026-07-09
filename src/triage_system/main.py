@@ -3,9 +3,11 @@ import os
 from triage_system.core.state import PatientSessionState
 from triage_system.tools.rag_tool import DepartmentRAGTool
 from triage_system.tools.clinical_tool import ClinicalPackagesTool
+from triage_system.tools.finance_tool import FinanceDatabaseTool
 from triage_system.agents.triage_agent import TriageAgent
 from triage_system.agents.medical_planner import MedicalPlannerAgent
 from dotenv import load_dotenv
+from triage_system.agents.financial_estimator import FinancialEstimatorAgent
 
 load_dotenv()
 
@@ -23,12 +25,12 @@ def run_pipeline():
 
     # 2. Wire Infrastructure & Inject Stateful Tools
     rag_tool = DepartmentRAGTool()
-    clinical_tool = ClinicalPackagesTool(
-        state=session_state
-    )  # Injected Session State Reference
+    clinical_tool = ClinicalPackagesTool()
+    finance_db = FinanceDatabaseTool()
 
     triage_agent = TriageAgent(rag_tool=rag_tool)
     medical_planner = MedicalPlannerAgent(clinical_tool=clinical_tool)
+    financial_estimator = FinancialEstimatorAgent(finance_db_tool=finance_db)
 
     # 3. Step 2: Run Triage Agent
     print(f"[Step 1 & 2] Running Triage Agent RAG Routing...")
@@ -72,7 +74,7 @@ def run_pipeline():
     print(explanation)
     print("--------------------------------------------------")
 
-    print("=== [Step 6: USER INTERACTION FIELD] ===")
+    print("[Step 6] USER INTERACTION FIELD")
     print("Please type the tests you want to confirm (separated by commas):")
 
     user_confirmation = input(">> ").strip()
@@ -97,16 +99,15 @@ def run_pipeline():
     print(session_state.final_billing_payload.model_dump_json(indent=2)) # type: ignore
     print("========================================================")
 
-    # Step 10: Presenting output metrics cleanly to user interface visualization
     print("\n========================================================")
-    print("        PATIENT RECEIPT AND FINAL COST ESTIMATE SUMMARY  ")
+    print("[Step 8 + 9 + 10] PATIENT RECEIPT AND FINAL COST ESTIMATE SUMMARY]")
     print("========================================================")
     print(f"Patient Tracking Reference: {session_state.patient_id}")
     print(f"Target Department:          {session_state.selected_department}")
     print(f"Carrier Network:            {session_state.final_billing_payload.insurance_provider if session_state.final_billing_payload else 'N/A'}")
     print("--------------------------------------------------------")
+    session_state = financial_estimator.calculate_cost_estimate(session_state)
     print("Itemized Financial Breakdown Details:")
-    print(session_state.cost_estimation_breakdown)
     if session_state.cost_estimation_breakdown:
         for transaction_item, dollar_value in session_state.cost_estimation_breakdown.items():
             print(f"  {transaction_item:<40}: ${dollar_value:>8.2f}")
