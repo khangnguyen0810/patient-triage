@@ -24,48 +24,14 @@ class MedicalPlannerAgent:
     def serialize_billing_payload(
         self, state: PatientSessionState
     ) -> PatientSessionState:
-        """
-        Task 2 (Step 7): Deterministic Data Transformation.
-        Maps raw procedure selections to static code structures with no AI overhead.
-        """
         if not state.confirmed_procedures:
             raise ValueError(
                 "Execution Error: Cannot serialize an empty procedure checklist."
             )
 
-        # Hardcoded deterministic corporate mapping index registry
-        CODE_REGISTRY = {
-            "blood": "SV001",
-            "cbc": "SV001",
-            "ultrasound": "SV002",
-            "echocardiogram": "SV002",
-            "x-ray": "SV003",
-            "mri": "SV003",
-            "imaging": "SV003",
-        }
+        CODE_REGISTRY = self.clinical_tool.get_service_code()
 
-        compiled_services = []
+        structured_payload = self.clinical_tool.build_json_payload(state)
 
-        for procedure in state.confirmed_procedures:
-            normalized_name = procedure.lower()
-            matched_code = "SV000"
-
-            for keyword, code in CODE_REGISTRY.items():
-                if keyword in normalized_name:
-                    matched_code = code
-                    break
-
-            compiled_services.append(
-                ServiceItem(service_code=matched_code, procedure_name=procedure)
-            )
-
-        structured_payload = FEABillingPayload(
-            registered_department=state.selected_department or "Unknown",
-            confirmed_services=compiled_services,
-            insurance_provider=state.insurance_details.get("provider", "Self-Pay"),
-            insurance_policy_id=state.insurance_details.get("policy_id", "NONE"),
-        )
-
-        # Synchronize our primary application state machine contract
         state.final_billing_payload = structured_payload
         return state

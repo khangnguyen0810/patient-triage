@@ -1,5 +1,6 @@
 from typing import Dict, Any
 
+
 class FinanceDatabaseTool:
     def __init__(self):
         # Simulated hospital chargemaster price list index lookup
@@ -7,7 +8,7 @@ class FinanceDatabaseTool:
             "SV001": 150.00,  # Complete Blood Count (CBC)
             "SV002": 350.00,  # Echocardiogram / Ultrasound
             "SV003": 600.00,  # X-Ray / Advanced Imaging
-            "SV000": 100.00   # General Consultation / Standard Line Item
+            "SV000": 100.00,  # General Consultation / Standard Line Item
         }
 
         # Simulated insurance policy coverage rules engine matrix
@@ -16,7 +17,7 @@ class FinanceDatabaseTool:
             "bluecross": 0.80,
             "aetna": 0.70,
             "healthcorp": 0.90,
-            "self-pay": 0.00
+            "self-pay": 0.00,
         }
 
     def lookup_unit_price(self, service_code: str) -> float:

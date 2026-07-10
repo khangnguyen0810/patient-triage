@@ -1,0 +1,22 @@
+[
+  {
+    "department_name": "Cardiology",
+    "document": "Deals with cardiovascular health, chest pain, heart palpitations, chronic high blood pressure, and stroke risks."
+  },
+  {
+    "department_name": "Neurology",
+    "document": "Deals with central nervous systems, brain injuries, migraines, chronic dizziness, numbness, and tremors."
+  },
+  {
+    "department_name": "Orthopedics",
+    "document": "Deals with skeletal systems, musculoskeletal issues, bone fractures, intense joint back pain, and muscle sprains."
+  },
+  {
+    "department_name": "Gastroenterology",
+    "document": "Deals with digestive tracks, severe abdominal cramps, persistent nausea, acid reflux, stomach bugs, and vomiting."
+  },
+  {
+    "department_name": "Pulmonology",
+    "document": "Deals with respiratory systems, chronic coughs, wheezing, severe asthma, lung infections, and breathing congestion."
+  }
+]

@@ -20,7 +20,7 @@ def run_pipeline():
         patient_id="PT-2026-X",
         raw_symptoms=[
             "I have persistent stomach pain, severe cramps, and I feel nauseous after eating."
-        ], # type: ignore
+        ],  # type: ignore
     )
 
     # 2. Wire Infrastructure & Inject Stateful Tools
@@ -78,25 +78,26 @@ def run_pipeline():
     print("Please type the tests you want to confirm (separated by commas):")
 
     user_confirmation = input(">> ").strip()
-    session_state.confirmed_procedures = [proc.strip() for proc in user_confirmation.split(",")]
+    session_state.confirmed_procedures = [
+        proc.strip() for proc in user_confirmation.split(",")
+    ]
 
     print("Enter your Insurance Provider Name (e.g., BlueCross):")
     ins_provider = input(">> ").strip()
     print("Enter your Alphanumeric Insurance Policy Number:")
     ins_id = input(">> ").strip()
-    
-    session_state.insurance_details = {
-        "provider": ins_provider,
-        "policy_id": ins_id
-    }
 
-    print("\n[Step 7] Passing confirmed choices to MPA AI Agent for strict billing serialization...")
+    session_state.insurance_details = {"provider": ins_provider, "policy_id": ins_id}
+
+    print(
+        "\n[Step 7] Passing confirmed choices to MPA AI Agent for strict billing serialization..."
+    )
     session_state = medical_planner.serialize_billing_payload(session_state)
 
     print("\n========================================================")
     print("FINAL STRUCTURED TARGET OBJECT READY FOR TRANSMISSION TO FEA:")
     print("========================================================")
-    print(session_state.final_billing_payload.model_dump_json(indent=2)) # type: ignore
+    print(session_state.final_billing_payload.model_dump_json(indent=2))  # type: ignore
     print("========================================================")
 
     print("\n========================================================")
@@ -104,17 +105,23 @@ def run_pipeline():
     print("========================================================")
     print(f"Patient Tracking Reference: {session_state.patient_id}")
     print(f"Target Department:          {session_state.selected_department}")
-    print(f"Carrier Network:            {session_state.final_billing_payload.insurance_provider if session_state.final_billing_payload else 'N/A'}")
+    print(
+        f"Carrier Network:            {session_state.final_billing_payload.insurance_provider if session_state.final_billing_payload else 'N/A'}"
+    )
     print("--------------------------------------------------------")
     session_state = financial_estimator.calculate_cost_estimate(session_state)
     print("Itemized Financial Breakdown Details:")
     if session_state.cost_estimation_breakdown:
-        for transaction_item, dollar_value in session_state.cost_estimation_breakdown.items():
+        for (
+            transaction_item,
+            dollar_value,
+        ) in session_state.cost_estimation_breakdown.items():
             print(f"  {transaction_item:<40}: ${dollar_value:>8.2f}")
     print("--------------------------------------------------------")
-    print(f"FINAL PATIENT OUT-OF-POCKET ESTIMATE:        ${session_state.final_out_of_pocket_cost:>8.2f}")
+    print(
+        f"FINAL PATIENT OUT-OF-POCKET ESTIMATE:        ${session_state.final_out_of_pocket_cost:>8.2f}"
+    )
     print("========================================================")
-
 
 
 if __name__ == "__main__":

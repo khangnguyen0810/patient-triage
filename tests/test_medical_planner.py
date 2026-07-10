@@ -8,7 +8,7 @@ def test_medical_planner_successfully_fetch_packages():
         patient_id="PT-2026",
         raw_symptoms=["I have sharp chest pain and my heart is beating fast"],
         selected_department="Cardiology",
-    )
+    )  # type: ignore
 
     clinical_tool = ClinicalPackagesTool(state=initial_state)
     medical_planner = MedicalPlannerAgent(clinical_tool=clinical_tool)
@@ -33,7 +33,7 @@ def test_mpa_transforms_billing_payload_deterministically():
         patient_id="PT-2026-X",
         raw_symptoms=[
             "I have persistent stomach pain, severe cramps, and I feel nauseous after eating."
-        ],
+        ],  # type: ignore
     )
     tool = ClinicalPackagesTool(state=initial_state)
     agent = MedicalPlannerAgent(clinical_tool=tool)
