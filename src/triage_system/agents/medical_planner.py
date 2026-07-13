@@ -29,8 +29,6 @@ class MedicalPlannerAgent:
                 "Execution Error: Cannot serialize an empty procedure checklist."
             )
 
-        CODE_REGISTRY = self.clinical_tool.get_service_code()
-
         structured_payload = self.clinical_tool.build_json_payload(state)
 
         state.final_billing_payload = structured_payload

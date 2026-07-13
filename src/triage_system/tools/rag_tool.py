@@ -3,6 +3,7 @@ import chromadb
 from typing import List, Dict
 import os
 
+
 class DepartmentRAGTool:
     def __init__(self, database_path: str = "./chroma_db"):
         self.client = chromadb.CloudClient(

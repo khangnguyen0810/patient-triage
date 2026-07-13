@@ -78,8 +78,15 @@ def run_pipeline():
     print("Please type the tests you want to confirm (separated by commas):")
 
     user_confirmation = input(">> ").strip()
+
+    selected_indices = [
+        int(i.strip()) for i in user_confirmation.split(",") if i.strip().isdigit()
+    ]
+
     session_state.confirmed_procedures = [
-        proc.strip() for proc in user_confirmation.split(",")
+        session_state.proposed_procedures[i - 1]
+        for i in selected_indices
+        if 1 <= i <= len(session_state.proposed_procedures)
     ]
 
     print("Enter your Insurance Provider Name (e.g., BlueCross):")

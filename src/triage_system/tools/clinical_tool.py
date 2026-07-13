@@ -1,78 +1,46 @@
 from typing import List
+from sqlalchemy import text
+from triage_system.db import SessionLocal
 from triage_system.core.state import PatientSessionState, FEABillingPayload, ServiceItem
 
 
 class ClinicalPackagesTool:
-    def __init__(self):
-        """
-        Injects the session state so that when Gemini triggers this tool,
-        the retrieved items are simultaneously tracked in our state system.
-        """
-        self._package_db = {
-            "Cardiology": [
-                "Electrocardiogram (ECG)",
-                "Echocardiogram (Heart Ultrasound)",
-                "Complete Blood Count (CBC)",
-            ],
-            "Neurology": [
-                "Brain MRI Scan",
-                "Electroencephalogram (EEG)",
-                "Basic Metabolic Panel (BMP)",
-            ],
-            "Orthopedics": ["X-Ray Imaging", "Physical Joint Mobility Assessment"],
-            "Gastroenterology": [
-                "Abdominal Ultrasound",
-                "Liver Function Panel Blood Test",
-                "H. Pylori Stool Test",
-            ],
-            "Pulmonology": [
-                "Chest X-Ray",
-                "Spirometry Pulmonary Test",
-                "Arterial Blood Gas",
-            ],
-        }
-
     def fetch_department_examination_packages(self, department: str) -> List[str]:
-        procedures = self._package_db.get(
-            department, ["Standard General Physician Consultation"]
-        )
+        with SessionLocal() as session:
+            rows = session.execute(
+                text("""
+                    SELECT p.name
+                    FROM procedures p
+                    JOIN departments d ON p.department_id = d.id
+                    WHERE d.name = :department
+                """),
+                {"department": department},
+            ).fetchall()
 
-        return procedures
+        if not rows:
+            return ["Standard General Physician Consultation"]
+        return [row[0] for row in rows]
 
-    def get_service_code(self):
-        CODE_REGISTRY = {
-            "blood": "SV001",
-            "cbc": "SV001",
-            "ultrasound": "SV002",
-            "echocardiogram": "SV002",
-            "x-ray": "SV003",
-            "mri": "SV003",
-            "imaging": "SV003",
-        }
-        return CODE_REGISTRY
+    def get_service_code(self, procedure_name: str) -> str:
+        with SessionLocal() as session:
+            row = session.execute(
+                text("SELECT service_code FROM procedures WHERE name = :name"),
+                {"name": procedure_name},
+            ).fetchone()
+        return row[0] if row else "SV000"
 
     def build_json_payload(self, state: PatientSessionState) -> FEABillingPayload:
-        CODE_REGISTRY = self.get_service_code()
-        compiled_services = []
-
-        for procedure in state.confirmed_procedures:
-            normalized_name = procedure.lower()
-            matched_code = "SV000"
-
-            for keyword, code in CODE_REGISTRY.items():
-                if keyword in normalized_name:
-                    matched_code = code
-                    break
-
-            compiled_services.append(
-                ServiceItem(service_code=matched_code, procedure_name=procedure)
+        compiled_services = [
+            ServiceItem(
+                service_code=self.get_service_code(procedure),
+                procedure_name=procedure,
             )
+            for procedure in state.confirmed_procedures
+        ]
 
-        structured_payload = FEABillingPayload(
+        return FEABillingPayload(
             registered_department=state.selected_department or "Unknown",
             confirmed_services=compiled_services,
             insurance_provider=state.insurance_details.get("provider", "Self-Pay"),
             insurance_policy_id=state.insurance_details.get("policy_id", "NONE"),
         )
-
-        return structured_payload
