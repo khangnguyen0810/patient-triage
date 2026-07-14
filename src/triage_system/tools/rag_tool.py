@@ -5,7 +5,7 @@ import os
 
 
 class DepartmentRAGTool:
-    def __init__(self, database_path: str = "./chroma_db"):
+    def __init__(self):
         self.client = chromadb.CloudClient(
             api_key=os.environ["CHROMA_API_KEY"],
             tenant=os.environ["CHROMA_TENANT"],

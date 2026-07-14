@@ -86,7 +86,7 @@ class TriageAgent:
                 final_text = event.content.parts[0].text
         return final_text or ""
 
-    def execute_triage(self, state: PatientSessionState) -> PatientSessionState:
+    async def execute_triage(self, state: PatientSessionState) -> PatientSessionState:
         if not state.raw_symptoms:
             raise ValueError("Execution Error: Symptom list is missing.")
 
@@ -101,12 +101,10 @@ class TriageAgent:
         )
 
         try:
-            raw_output = asyncio.run(
-                self._run_async(
-                    user_id=str(state.patient_id),
-                    session_id=f"triage-{state.patient_id}",
-                    prompt=prompt,
-                )
+            raw_output = await self._run_async(
+                user_id=str(state.patient_id),
+                session_id=f"triage-{state.patient_id}",
+                prompt=prompt,
             )
             print(f"[TriageAgent] Live ADK Agent Raw Output: '{raw_output}'")
             refined_departments = self._parse_final_answer(raw_output)

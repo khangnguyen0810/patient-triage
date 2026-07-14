@@ -35,8 +35,8 @@ class PatientSessionState(BaseModel):
     patient_id: str = Field(
         ..., description="Unique identification string for the patient."
     )
-    raw_symptoms: List[str] = Field(
-        default_factory=list, description="Symptoms explicitly provided by the patient."
+    raw_symptoms: str = Field(
+        ..., description="Symptoms explicitly provided by the patient."
     )
 
     recommended_departments: List[str] = Field(

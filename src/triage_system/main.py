@@ -18,9 +18,7 @@ def run_pipeline():
     # 1. Initialize Root Tracking State (Step 1)
     session_state = PatientSessionState(
         patient_id="PT-2026-X",
-        raw_symptoms=[
-            "I have persistent stomach pain, severe cramps, and I feel nauseous after eating."
-        ],  # type: ignore
+        raw_symptoms=["c"],  # type: ignore
     )
 
     # 2. Wire Infrastructure & Inject Stateful Tools
@@ -37,23 +35,16 @@ def run_pipeline():
     session_state = triage_agent.execute_triage(session_state)
 
     # 4. Step 3: Human-in-the-Loop Interruption Simulation
-    print("\n--------------------------------------------------")
-    print(
-        f"DISPLAY ON PATIENT SCREEN: Recommended Departments: {session_state.recommended_departments}"
-    )
-    print("--------------------------------------------------")
+    print(f"Recommended Departments: {session_state.recommended_departments}")
 
-    # Accept user command-line input to simulate clicking a UI element
     print("Enter the department you wish to register for:")
     selected_dept = input(">> ").strip()
 
-    # Save the human choice to our unified state architecture
     session_state.selected_department = selected_dept
     print(
         f"\n[Step 3] Choice Locked. State updated: selected_department = '{session_state.selected_department}'"
     )
 
-    # 5. Steps 4 & 5: Run Medical Planner Agent
     print(f"\n[Step 4 & 5] Activating Medical Planner Agent...")
     explanation = (
         f"Based on your symptoms and registration in the *{session_state.selected_department}* department, "
@@ -69,10 +60,7 @@ def run_pipeline():
         "assessment. Please confirm these items and provide your insurance details to proceed."
     )
 
-    print("\n--------------------------------------------------")
-    print("DISPLAY ON PATIENT SCREEN (PROPOSED PLAN):")
-    print(explanation)
-    print("--------------------------------------------------")
+    print(f"DISPLAY ON PATIENT SCREEN (PROPOSED PLAN): {explanation}")
 
     print("[Step 6] USER INTERACTION FIELD")
     print("Please type the tests you want to confirm (separated by commas):")
