@@ -1,101 +1,125 @@
 # Patient Triage & Financial Estimation System
 
-An intelligent patient triage and automated medical cost estimation system. It leverages a Multi-Agent architecture (Triage Agent, Medical Planner, Financial Estimator) combined with a Retrieval-Augmented Generation (RAG) mechanism to optimize patient routing and bring transparency to healthcare financing.
+An intelligent patient triage and medical cost estimation REST API powered by a Multi-Agent architecture (Triage Agent, Medical Planner, and Financial Estimator) combined with Retrieval-Augmented Generation (RAG).
 
 ---
 
 ## ⚙️ Tech Stack
 
-Based on the project's codebase, the core technologies include:
-*   **Language & Package Management:** Python 3.12+, using the **`uv`** tool to manage virtual environments and dependencies (`pyproject.toml`, `uv.lock`).
-*   **AI & Agent Framework:** Google GenAI SDK & Google ADK (Agent Development Kit) to construct the Multi-Agent system and define clinical and financial tools.
-*   **Vector Database (RAG):** **ChromaDB Cloud** for storing embeddings and performing semantic search across hospital departments.
-*   **Primary Database:** **Supabase** for managing relational database structures (examination package information, insurance codes, and pricing tables).
+* **Language & Package Manager:** Python 3.12+ managed via **`uv`** (`pyproject.toml`, `uv.lock`).
+* **Web Framework:** **FastAPI** & **Uvicorn** serving a stateless REST API.
+* **AI & Agent Framework:** **Google GenAI SDK** & **Google ADK (Agent Development Kit)**.
+* **Vector Database (RAG):** **ChromaDB Cloud** (`hospital_routing` collection) for semantic symptom-to-department routing.
+* **Relational Database:** **Supabase** (PostgreSQL) for managing diagnostic bundles, service codes, and insurance coverage rules.
+* **State Engine:** **Pydantic** (`PatientSessionState`) for data validation and sequential pipeline tracking across endpoints.
 
 ---
 
-## 📊 Prerequisites (Data Setup)
+## 🔄 Workflow & Pipeline Architecture
 
-To ensure correct system operation, data must be prepared and synchronized across two storage platforms:
-
-### 1. On ChromaDB Cloud (Vector Database)
-*   **Collection `hospital_routing`**: A vector space storing semantic descriptions for each department (detailed symptom lists and medical conditions handled by that division). This data feeds the RAG mechanism, allowing the `Triage Agent` to make highly precise routing decisions.
-
-### 2. On Supabase (Relational Database)
-*   `departments`: Administrative directory of hospital departments/divisions.
-*   `procedures`: List of examination packages and clinical services mapped to each department.
-*   `service_codes`: Service billing codes paired with base prices for each diagnostic item.
-*   `insurance_rules`: Coverage policies, rules, and reimbursement rates for different insurance carriers.
-
----
-
-## 🔄 Workflow
-
-The system operates in a strict sequential pipeline through the following steps:
+The system processes requests through a sequential state-passing pipeline:
 
 
 ```
 
-[Symptom Intake] ➔ [RAG Routing] ➔ [Select Dept] ➔ [Fetch Packages] ➔ [Confirm Plan & Ins] ➔ [Resolve Costs] ➔ [Output Summary]
+[Symptom Input] ➔ [1. Triage Agent / RAG] ➔ [2. Select Dept] ➔ [3. Medical Planner] ➔ [4. Confirm Plan & Ins] ➔ [5. Financial Estimator] ➔ [6. Final Breakdown]
 
 ```
 
-1.  **Symptom Intake:** The user inputs a description of the patient's current health status or symptoms.
-2.  **Automated Routing (RAG):** The `Triage Agent` activates the RAG tool connected to ChromaDB Cloud, running a semantic query against the `hospital_routing` collection to identify the **2 most relevant departments**.
-3.  **Department Selection:** The user selects the exact department they wish to register for from the 2 system recommendations.
-4.  **Package Retrieval:** The system accesses the database's `procedures` table to pull all available diagnostic bundles/procedures for the chosen department.
-5.  **Plan Confirmation & Insurance:** The user selects their desired examination packages and inputs their health insurance details (provider name and policy ID).
-6.  **Price Resolution:** The system matches data between `service_codes` (to fetch base unit prices) and `insurance_rules` (to evaluate specific network coverage rates).
-7.  **Financial Calculation:** The Financial Agent executes itemized arithmetic calculations, applying insurance rules to generate a final out-of-pocket cost summary that the patient is responsible for.
+1. **Symptom Intake & Routing:** Accepts patient symptom strings and queries ChromaDB Cloud to identify top candidate departments.
+2. **Department Selection:** Updates the session state with the selected hospital division.
+3. **Medical Plan Proposal:** Queries Supabase procedure catalogs to recommend diagnostic packages for the target department.
+4. **Plan & Insurance Confirmation:** Captures patient-confirmed diagnostic packages and active insurance details (carrier name and policy ID).
+5. **Price & Coverage Resolution:** Matches items to base pricing tables in Supabase and applies network insurance carrier rules.
+6. **Financial Calculation:** Outputs an itemized financial summary and total out-of-pocket cost responsibility.
 
 ---
 
-## 📥 System Inputs & Outputs
+## 📊 Environment & Database Prerequisites
 
-*   **Inputs:**
-    *   Raw patient symptom description string.
-    *   Target department selection.
-    *   List of chosen clinical packages/procedures.
-    *   Patient-provided insurance details (carrier name, policy ID).
-*   **Outputs:**
-    *   Itemized cost breakdown and final out-of-pocket expenditure (adjusted for active insurance coverage rules).
+Ensure database collections and tables are configured before starting the API server:
+
+### 1. ChromaDB Cloud (Vector Store)
+* Collection `hospital_routing`: Stores semantic descriptions and handled conditions per medical department.
+
+### 2. Supabase (Relational Database)
+* `departments`: Directory of medical divisions.
+* `procedures`: Clinical examination packages mapped to departments.
+* `service_codes`: Itemized billing codes paired with base unit rates.
+* `insurance_rules`: Provider coverage tiers and reimbursement rates.
 
 ---
 
-## 🚀 Installation & Quick Start
-
-Since the project integrates the high-performance `uv` package manager, setting up the environment is exceptionally fast.
+## 📥 Installation & Setup
 
 ### 1. Environment Synchronization
-Install all project dependencies locked in `uv.lock`:
+Install project dependencies locked in `uv.lock`:
 ```bash
 uv sync
 
 ```
 
-### 2. Database Seeding
+### 2. Environment Variables
 
-Run the data setup script to seed department routes directly into ChromaDB Cloud:
+Create a `.env` file in the project root:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+CHROMADB_API_KEY=your_chromadb_api_key
+CHROMADB_TENANT=your_tenant
+CHROMADB_DATABASE=your_database
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+
+```
+
+### 3. Database Seeding
+
+Seed department routes into ChromaDB Cloud:
 
 ```bash
 uv run python src/triage_system/scripts/seed_departments.py
 
 ```
 
-### 3. Running the Application
+---
 
-Execute the main entry point to initiate the patient triage pipeline:
+## 🚀 Running the API Server
+
+Start the REST API server locally using `uv` and `uvicorn`:
 
 ```bash
-uv run python src/triage_system/main.py
+uv run uvicorn triage_system.api:app --host 127.0.0.1 --port 8000 --reload
 
 ```
 
-### 4. Running Tests
+Once running, access the interactive Swagger documentation in your browser at:
+👉 **`http://127.0.0.1:8000/docs`**
 
-If you want to verify the system integrity across your medical and financial agents:
+---
+
+## 🌐 REST API Endpoints
+
+| Endpoint | Method | Payload / Params | Description |
+| --- | --- | --- | --- |
+| `/api/pipeline/initialize` | `POST` | `{"raw_symptoms": ["string"]}` | Starts a session, executes Triage Agent RAG routing, and returns state with recommended departments. |
+| `/api/pipeline/propose-plan` | `POST` | `PatientSessionState` | Accepts state containing `selected_department`, runs Medical Planner Agent, and populates proposed diagnostic tests. |
+| `/api/pipeline/finalize-estimate` | `POST` | `PatientSessionState` | Accepts state containing `confirmed_procedures` & `insurance_details`, serializes billing, and calculates final out-of-pocket costs. |
+
+---
+
+## 🧪 Testing & Execution Modes
+
+Run unit tests across agent tools:
 
 ```bash
 uv run pytest
+
+```
+
+Run legacy CLI interactive terminal mode:
+
+```bash
+uv run python src/triage_system/main.py
 
 ```
