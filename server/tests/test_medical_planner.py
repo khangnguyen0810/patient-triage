@@ -19,6 +19,11 @@ def test_medical_planner_successfully_fetch_packages():
         "Echocardiogram (Heart Ultrasound)",
         "Complete Blood Count (CBC)",
     ]
+    assert updated_state.package_analysis is not None
+    assert "assistant_walkthrough" in updated_state.package_analysis
+    assert len(updated_state.package_analysis["categorized_items"]) == 3
+    assert updated_state.package_analysis["categorized_items"][0]["priority"] == "Must-Have (Priority 1)"
+
 
 
 # tests/test_medical_planner.py

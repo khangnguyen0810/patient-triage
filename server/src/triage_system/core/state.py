@@ -60,6 +60,11 @@ class PatientSessionState(BaseModel):
         default_factory=dict,
         description="Patient-provided insurance parameters (provider, policy number).",
     )
+    package_analysis: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="Categorized clinical analysis with plain language translations, priority grouping, and contextual justifications.",
+    )
+
 
     final_billing_payload: Optional[FEABillingPayload] = Field(
         None,

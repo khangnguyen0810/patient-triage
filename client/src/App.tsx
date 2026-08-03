@@ -16,6 +16,21 @@ interface FEABillingPayload {
   insurance_policy_id: string;
 }
 
+interface PackageCategorizationItem {
+  procedure_name: string;
+  plain_name: string;
+  simplified_explanation: string;
+  exclusions_plain: string;
+  priority: string;
+  priority_level: number;
+  justification: string;
+}
+
+interface PackageAnalysis {
+  assistant_walkthrough: string;
+  categorized_items: PackageCategorizationItem[];
+}
+
 interface PatientSessionState {
   patient_id: string;
   raw_symptoms: string;
@@ -28,6 +43,7 @@ interface PatientSessionState {
     policy_id?: string;
     [key: string]: any;
   };
+  package_analysis?: PackageAnalysis | null;
   final_billing_payload: FEABillingPayload | null;
   cost_estimation_breakdown: Record<string, number>;
   final_out_of_pocket_cost: number;
@@ -82,6 +98,7 @@ export default function App() {
     proposed_procedures: [],
     confirmed_procedures: [],
     insurance_details: {},
+    package_analysis: null,
     final_billing_payload: null,
     cost_estimation_breakdown: {},
     final_out_of_pocket_cost: 0,
@@ -236,6 +253,7 @@ export default function App() {
       proposed_procedures: [],
       confirmed_procedures: [],
       insurance_details: {},
+      package_analysis: null,
       final_billing_payload: null,
       cost_estimation_breakdown: {},
       final_out_of_pocket_cost: 0,
@@ -464,7 +482,7 @@ export default function App() {
               TMA
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-bold text-[#1b6bf9] tracking-tight">ST. JUDE CLINICS</span>
+              <span className="text-base font-bold text-[#1b6bf9] tracking-tight">TVA PATIENT TRIAGE</span>
               <span className="text-2xs font-medium text-slate-500 uppercase tracking-wider">TMA Virtual Assistant Builder</span>
             </div>
           </div>
@@ -697,10 +715,28 @@ export default function App() {
                     </p>
                   </div>
 
-                  <div className="space-y-3">
+                  {/* Personal Care Assistant Walkthrough Header Box */}
+                  {sessionState.package_analysis?.assistant_walkthrough && (
+                    <div className="bg-[#edf4ff] border border-[#1b6bf9]/30 p-5 rounded-2xl flex items-start gap-4 shadow-2xs">
+                      <div className="w-10 h-10 rounded-xl bg-[#1b6bf9] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                        AI
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#1b6bf9] block">
+                          Personal Care Assistant Walkthrough
+                        </span>
+                        <p className="text-xs text-slate-700 leading-relaxed font-sans">
+                          {sessionState.package_analysis.assistant_walkthrough}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Proposed Clinical Procedures with Simplification & Priority Categorization */}
+                  <div className="space-y-5">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
-                        Proposed Clinical Procedures
+                        Categorized Clinical Package Recommendations
                       </span>
                       {sessionState.trace_logs?.["propose-plan"] && (
                         <button
@@ -713,39 +749,144 @@ export default function App() {
                         </button>
                       )}
                     </div>
-                    <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
-                      {sessionState.proposed_procedures.map((proc) => {
-                        const isChecked = sessionState.confirmed_procedures.includes(proc);
+
+                    {/* Grouped Priorities: Level 1 (Must-Have), Level 2 (Recommended), Level 3 (Optional) */}
+                    {[1, 2, 3].map((pLevel) => {
+                      const analysisItems = sessionState.package_analysis?.categorized_items || [];
+                      const levelItems = analysisItems.filter(item => item.priority_level === pLevel);
+                      
+                      // Fallback if no package analysis exists yet (legacy proposed_procedures list)
+                      if (analysisItems.length === 0) {
+                        if (pLevel !== 1) return null;
                         return (
-                          <label
-                            key={proc}
-                            className="flex items-center gap-3.5 p-4 hover:bg-[#edf4ff]/30 cursor-pointer select-none transition-colors"
-                          >
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4 accent-[#1b6bf9] rounded border-slate-300 focus:ring-[#1b6bf9] focus:ring-offset-0"
-                              checked={isChecked}
-                              onChange={() => {
-                                if (isChecked) {
-                                  setSessionState({
-                                    ...sessionState,
-                                    confirmed_procedures: sessionState.confirmed_procedures.filter((p) => p !== proc),
-                                  });
-                                } else {
-                                  setSessionState({
-                                    ...sessionState,
-                                    confirmed_procedures: [...sessionState.confirmed_procedures, proc],
-                                  });
-                                }
-                              }}
-                            />
-                            <span className="text-sm text-slate-800 font-medium">
-                              {proc}
-                            </span>
-                          </label>
+                          <div key="legacy" className="space-y-3">
+                            <span className="text-xs font-bold uppercase text-slate-700">Proposed Clinical Procedures</span>
+                            <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
+                              {sessionState.proposed_procedures.map((proc) => {
+                                const isChecked = sessionState.confirmed_procedures.includes(proc);
+                                return (
+                                  <label key={proc} className="flex items-center gap-3.5 p-4 hover:bg-[#edf4ff]/30 cursor-pointer select-none">
+                                    <input
+                                      type="checkbox"
+                                      className="w-4 h-4 accent-[#1b6bf9] rounded border-slate-300"
+                                      checked={isChecked}
+                                      onChange={() => {
+                                        if (isChecked) {
+                                          setSessionState({
+                                            ...sessionState,
+                                            confirmed_procedures: sessionState.confirmed_procedures.filter((p) => p !== proc),
+                                          });
+                                        } else {
+                                          setSessionState({
+                                            ...sessionState,
+                                            confirmed_procedures: [...sessionState.confirmed_procedures, proc],
+                                          });
+                                        }
+                                      }}
+                                    />
+                                    <span className="text-sm font-medium text-slate-800">{proc}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
                         );
-                      })}
-                    </div>
+                      }
+
+                      if (levelItems.length === 0) return null;
+
+                      let badgeStyle = "bg-rose-100 text-rose-700 border-rose-200";
+                      let levelTitle = "Must-Have (Priority 1)";
+                      let levelSubtitle = "Mandatory coverage essential for your specific symptoms & acute risk areas.";
+
+                      if (pLevel === 2) {
+                        badgeStyle = "bg-amber-100 text-amber-800 border-amber-200";
+                        levelTitle = "Recommended (Priority 2)";
+                        levelSubtitle = "High-value preventive additions suited to your profile and care plan.";
+                      } else if (pLevel === 3) {
+                        badgeStyle = "bg-slate-100 text-slate-700 border-slate-200";
+                        levelTitle = "Optional (Priority 3)";
+                        levelSubtitle = "Secondary add-ons or lower-priority diagnostic coverage.";
+                      }
+
+                      return (
+                        <div key={pLevel} className="space-y-3">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <div>
+                              <span className={`inline-block px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider rounded-md border ${badgeStyle}`}>
+                                {levelTitle}
+                              </span>
+                              <p className="text-2xs text-slate-500 mt-1 font-sans">{levelSubtitle}</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {levelItems.map((item) => {
+                              const isChecked = sessionState.confirmed_procedures.includes(item.procedure_name);
+                              return (
+                                <div
+                                  key={item.procedure_name}
+                                  className={`border rounded-2xl p-5 transition-all bg-white shadow-2xs ${
+                                    isChecked ? 'border-[#1b6bf9] ring-1 ring-[#1b6bf9]/20' : 'border-slate-200 opacity-80'
+                                  }`}
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <input
+                                      type="checkbox"
+                                      className="w-5 h-5 accent-[#1b6bf9] rounded border-slate-300 mt-1 cursor-pointer"
+                                      checked={isChecked}
+                                      onChange={() => {
+                                        if (isChecked) {
+                                          setSessionState({
+                                            ...sessionState,
+                                            confirmed_procedures: sessionState.confirmed_procedures.filter((p) => p !== item.procedure_name),
+                                          });
+                                        } else {
+                                          setSessionState({
+                                            ...sessionState,
+                                            confirmed_procedures: [...sessionState.confirmed_procedures, item.procedure_name],
+                                          });
+                                        }
+                                      }}
+                                    />
+                                    <div className="flex-1 space-y-2">
+                                      {/* Title & Technical Tag */}
+                                      <div className="flex items-center justify-between flex-wrap gap-2">
+                                        <h3 className="text-base font-bold text-slate-900">
+                                          {item.plain_name}
+                                        </h3>
+                                        <span className="text-3xs font-mono bg-slate-100 text-slate-500 px-2 py-0.5 rounded border border-slate-200">
+                                          {item.procedure_name}
+                                        </span>
+                                      </div>
+
+                                      {/* Simplified Explanation */}
+                                      <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                                        {item.simplified_explanation}
+                                      </p>
+
+                                      {/* Exclusions Plain */}
+                                      <div className="text-2xs text-slate-400 font-mono">
+                                        <span className="font-semibold text-slate-500 uppercase">Coverage Boundary: </span>
+                                        {item.exclusions_plain}
+                                      </div>
+
+                                      {/* Contextual Justification Callout */}
+                                      <div className="bg-[#edf4ff] border-l-3 border-[#1b6bf9] p-3 rounded-r-xl text-xs text-slate-700">
+                                        <span className="font-bold text-[#1b6bf9] uppercase tracking-wider text-3xs block mb-0.5">
+                                          Contextual Priority Reasoning
+                                        </span>
+                                        {item.justification}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div className="space-y-4 border-t border-slate-100 pt-5">
