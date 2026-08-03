@@ -37,7 +37,6 @@ interface PatientSessionState {
   candidate_tokens?: number;
 }
 
-
 // Preset symptom descriptions for easy user testing
 const PRESET_SYMPTOMS = [
   {
@@ -106,7 +105,6 @@ export default function App() {
     setDrawerOpen(true);
     setSearchQuery("");
   };
-
 
   // ==========================================
   // API SERVICE HANDLERS
@@ -262,30 +260,32 @@ export default function App() {
       { num: 4, label: "Financial Estimate" }
     ];
     return (
-      <div className="mb-12">
+      <div className="mb-10">
         <div className="flex items-center justify-between">
           {steps.map((s, idx) => (
             <div key={s.num} className="flex-1 relative">
               <div className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-mono transition-all duration-300 ${
+                <div className={`w-9 h-9 rounded-xl border flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
                   step === s.num
-                    ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold scale-110 shadow-sm'
+                    ? 'border-[#1b6bf9] bg-[#edf4ff] text-[#1b6bf9] font-bold scale-105 shadow-xs'
                     : step > s.num
-                      ? 'border-slate-400 bg-slate-100 dark:bg-slate-800 text-slate-500'
-                      : 'border-slate-200 dark:border-slate-800 text-slate-300 dark:text-slate-700'
+                      ? 'border-blue-200 bg-white text-[#1b6bf9]'
+                      : 'border-slate-200 bg-white text-slate-400'
                 }`}>
                   {s.num}
                 </div>
-                <span className={`mt-2 text-2xs uppercase tracking-widest font-mono hidden md:block transition-colors duration-300 ${
+                <span className={`mt-2.5 text-2xs uppercase tracking-wider font-medium hidden md:block transition-colors duration-300 ${
                   step === s.num
-                    ? 'text-slate-800 dark:text-slate-200 font-medium'
-                    : 'text-slate-400 dark:text-slate-600'
+                    ? 'text-[#1b6bf9] font-semibold'
+                    : 'text-slate-500'
                 }`}>
                   {s.label}
                 </span>
               </div>
               {idx < steps.length - 1 && (
-                <div className="absolute top-4 left-[calc(50%+16px)] right-[calc(-50%+16px)] h-[1px] bg-slate-200 dark:bg-slate-800 -z-10" />
+                <div className={`absolute top-4.5 left-[calc(50%+20px)] right-[calc(-50%+20px)] h-[2px] -z-10 transition-colors duration-300 ${
+                  step > s.num ? 'bg-[#1b6bf9]' : 'bg-slate-200'
+                }`} />
               )}
             </div>
           ))}
@@ -323,7 +323,7 @@ export default function App() {
       if (tag.includes("RAGTool")) {
         tagClass = "text-amber-400 font-bold font-mono";
       } else if (tag.includes("TriageAgent")) {
-        tagClass = "text-teal-400 font-bold font-mono";
+        tagClass = "text-[#60a5fa] font-bold font-mono";
       } else if (tag.includes("ClinicalPackagesTool")) {
         tagClass = "text-emerald-400 font-bold font-mono";
       } else if (tag.includes("FinancialEstimatorAgent") || tag.includes("FEA")) {
@@ -335,7 +335,7 @@ export default function App() {
       } else if (tag.includes("System")) {
         tagClass = "text-slate-200 font-bold font-mono";
       } else if (tag.includes("Error")) {
-        tagClass = "text-rose-500 font-bold font-mono";
+        tagClass = "text-rose-400 font-bold font-mono";
       }
       
       return (
@@ -350,25 +350,25 @@ export default function App() {
       <div className="fixed inset-0 z-50 overflow-hidden flex justify-end font-sans">
         {/* Backdrop overlay */}
         <div 
-          className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
+          className="absolute inset-0 bg-slate-950/50 backdrop-blur-xs transition-opacity duration-300"
           onClick={() => setDrawerOpen(false)}
         />
         
         {/* Drawer container */}
-        <div className="relative w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col z-10 animate-fade-in">
+        <div className="relative w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col z-10">
           {/* Header */}
           <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
             <div>
-              <h3 className="text-sm font-mono tracking-widest font-bold text-teal-400 uppercase">
+              <h3 className="text-sm font-mono tracking-widest font-bold text-[#60a5fa] uppercase">
                 SYSTEM_TRACE_EXPLORER
               </h3>
-              <p className="text-3xs font-mono text-slate-500 uppercase tracking-widest mt-0.5">
+              <p className="text-3xs font-mono text-slate-400 uppercase tracking-widest mt-0.5">
                 Session Reference: {sessionState.patient_id}
               </p>
             </div>
             <button 
               onClick={() => setDrawerOpen(false)}
-              className="px-2 py-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded font-mono text-2xs border border-slate-800 transition-colors cursor-pointer"
+              className="px-3 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg font-mono text-xs border border-slate-700 transition-colors cursor-pointer"
             >
               [ESC] CLOSE
             </button>
@@ -385,14 +385,14 @@ export default function App() {
                   onClick={() => setDrawerTab(t.id)}
                   className={`px-4 py-3 text-2xs font-mono uppercase tracking-widest border-b-2 transition-all font-semibold ${
                     drawerTab === t.id
-                      ? "border-teal-500 text-teal-400 bg-slate-900"
+                      ? "border-[#1b6bf9] text-[#60a5fa] bg-slate-900"
                       : hasLogs
                         ? "border-transparent text-slate-400 hover:text-slate-200 cursor-pointer"
                         : "border-transparent text-slate-700 cursor-not-allowed"
                   }`}
                 >
                   {t.label}
-                  {!hasLogs && <span className="text-3xs text-slate-800 ml-1">(LOCKED)</span>}
+                  {!hasLogs && <span className="text-3xs text-slate-600 ml-1">(LOCKED)</span>}
                 </button>
               );
             })}
@@ -403,7 +403,7 @@ export default function App() {
             <input
               type="text"
               placeholder="Search trace filters..."
-              className="flex-1 bg-slate-950 text-slate-200 border border-slate-800 rounded px-3 py-1.5 text-xs font-mono placeholder-slate-600 focus:outline-none focus:border-teal-500"
+              className="flex-1 bg-slate-950 text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono placeholder-slate-500 focus:outline-none focus:border-[#1b6bf9]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -413,7 +413,7 @@ export default function App() {
                 navigator.clipboard.writeText(text);
                 alert("Trace logs copied to clipboard!");
               }}
-              className="px-3 py-1.5 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 rounded text-xs font-mono transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-slate-950 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 rounded-lg text-xs font-mono transition-colors cursor-pointer"
             >
               COPY_ALL
             </button>
@@ -422,7 +422,7 @@ export default function App() {
           {/* Logs Console Pane */}
           <div className="flex-1 p-5 bg-slate-950 overflow-y-auto space-y-2 select-text font-mono">
             {filteredLogs.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-600 font-mono text-xs">
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 font-mono text-xs">
                 {logs.length === 0 ? (
                   <span>NO LOG ENTRIES RECORDED FOR THIS STAGE</span>
                 ) : (
@@ -439,7 +439,7 @@ export default function App() {
           </div>
 
           {/* Footer Status */}
-          <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-3xs font-mono text-slate-600 tracking-wider">
+          <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-3xs font-mono text-slate-500 tracking-wider">
             <span>SECURE CLEARANCE LEVEL 1</span>
             <span>SYSTEM CONSOLE v1.0.0</span>
           </div>
@@ -449,13 +449,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-[#f6f4ef] text-slate-900 flex flex-col font-sans antialiased">
       {/* Header Banner */}
-      <header className="border-b border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className="text-sm font-mono tracking-widest text-teal-600 dark:text-teal-400 font-bold">ST. JUDE CLINICS</span>
-            <span className="text-xs font-mono text-slate-400 tracking-wider">TRIAGE DISPATCH SYSTEM</span>
+      <header className="border-b border-[#e5e3de] bg-white sticky top-0 z-40 shadow-2xs">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#1b6bf9] flex items-center justify-center text-white font-bold text-xs shadow-xs">
+              TMA
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-[#1b6bf9] tracking-tight">ST. JUDE CLINICS</span>
+              <span className="text-2xs font-medium text-slate-500 uppercase tracking-wider">TMA Virtual Assistant Builder</span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {sessionState.trace_logs && Object.keys(sessionState.trace_logs).length > 0 && (
@@ -467,17 +472,17 @@ export default function App() {
                   else if (keys.includes("propose-plan")) openTraceDrawer("propose-plan");
                   else openTraceDrawer("initialize");
                 }}
-                className="px-2.5 py-1 text-3xs font-mono tracking-wider border border-slate-200 dark:border-slate-800 hover:border-teal-500/50 rounded bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer font-semibold uppercase shadow-3xs"
+                className="px-3 py-1.5 text-xs font-semibold tracking-wide border border-[#1b6bf9]/30 rounded-lg bg-[#edf4ff] text-[#1b6bf9] hover:bg-[#1b6bf9] hover:text-white transition-all cursor-pointer shadow-2xs"
               >
-                [ Trace Logs ]
+                Trace Logs
               </button>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1b6bf9] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#1b6bf9]"></span>
               </span>
-              <span className="text-2xs font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
+              <span className="text-2xs font-medium tracking-wider text-slate-600 uppercase">
                 Agent Pipeline Active
               </span>
             </div>
@@ -486,13 +491,13 @@ export default function App() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-grow max-w-3xl w-full mx-auto px-6 py-10 flex flex-col justify-center">
+      <main className="flex-grow max-w-4xl w-full mx-auto px-6 py-10 flex flex-col justify-center">
         {renderStepIndicator()}
 
         {/* Global Error Banner */}
         {error && (
-          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-sm font-mono flex items-start gap-3 rounded">
-            <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-start gap-3 rounded-xl shadow-xs">
+            <svg className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div>
@@ -503,15 +508,15 @@ export default function App() {
         )}
 
         {/* Central Stage Wrapper */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-900 rounded-lg p-6 md:p-8 shadow-sm">
+        <div className="bg-white border border-[#e4e2dd] rounded-2xl p-6 md:p-10 shadow-sm">
           
           {loading && (
-            <div className="py-12 flex flex-col items-center justify-center gap-4">
+            <div className="py-14 flex flex-col items-center justify-center gap-4">
               <div className="relative w-12 h-12">
-                <div className="absolute inset-0 rounded-full border-2 border-teal-500/20 animate-pulse"></div>
-                <div className="absolute inset-0 rounded-full border-t-2 border-teal-500 animate-spin"></div>
+                <div className="absolute inset-0 rounded-full border-2 border-[#1b6bf9]/20 animate-pulse"></div>
+                <div className="absolute inset-0 rounded-full border-t-2 border-[#1b6bf9] animate-spin"></div>
               </div>
-              <span className="text-xs font-mono uppercase tracking-widest text-teal-600 dark:text-teal-400 animate-pulse">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#1b6bf9] animate-pulse">
                 Consulting Agentic Pipeline...
               </span>
             </div>
@@ -522,22 +527,22 @@ export default function App() {
               {/* STEP 1: INTAKE SCREEN */}
               {step === 1 && (
                 <div className="space-y-6">
-                  <div className="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <h1 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white">
+                  <div className="space-y-1.5 border-b border-slate-100 pb-5">
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                       Patient Symptom Intake
                     </h1>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-600">
                       Submit patient symptoms in plain language. The Triage Agent routes case profiles using dynamic RAG classification.
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                       Symptom Description
                     </label>
                     <textarea
                       rows={5}
-                      className="w-full border border-slate-200 dark:border-slate-800 rounded bg-slate-50/50 dark:bg-slate-950 p-4 text-sm font-sans placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:bg-white dark:focus:bg-slate-950 transition-colors resize-none"
+                      className="w-full border border-slate-200 rounded-xl bg-slate-50/50 p-4 text-sm font-sans placeholder-slate-400 focus:outline-none focus:border-[#1b6bf9] focus:bg-white focus:ring-2 focus:ring-[#1b6bf9]/20 transition-all resize-none"
                       placeholder="Enter description here (e.g. pain level, duration, compounding factors)..."
                       value={sessionState.raw_symptoms}
                       onChange={(e) => setSessionState({ ...sessionState, raw_symptoms: e.target.value })}
@@ -545,21 +550,21 @@ export default function App() {
                   </div>
 
                   <div className="space-y-3">
-                    <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
                       Select Clinical Test Templates
                     </span>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {PRESET_SYMPTOMS.map((preset) => (
                         <button
                           key={preset.label}
                           type="button"
-                          className="text-left border border-slate-200 dark:border-slate-800 hover:border-teal-500/50 hover:bg-slate-50 dark:hover:bg-slate-950/50 p-3 rounded transition-all group"
+                          className="text-left border border-slate-200 hover:border-[#1b6bf9] hover:bg-[#edf4ff]/40 bg-white p-4 rounded-xl transition-all shadow-2xs group cursor-pointer"
                           onClick={() => setSessionState({ ...sessionState, raw_symptoms: preset.desc })}
                         >
-                          <span className="text-xs font-mono font-medium text-slate-800 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400 block transition-colors">
+                          <span className="text-xs font-semibold text-slate-800 group-hover:text-[#1b6bf9] block transition-colors">
                             {preset.label}
                           </span>
-                          <span className="text-2xs text-slate-400 line-clamp-1 mt-1 font-sans">
+                          <span className="text-2xs text-slate-500 line-clamp-1 mt-1 font-sans">
                             {preset.desc}
                           </span>
                         </button>
@@ -567,10 +572,10 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="pt-4 flex justify-end">
+                  <div className="pt-4 flex justify-end border-t border-slate-100">
                     <button
                       type="button"
-                      className="w-full md:w-auto px-6 py-2.5 bg-teal-600 dark:bg-teal-500 text-white rounded text-xs font-mono uppercase tracking-widest hover:bg-teal-700 dark:hover:bg-teal-600 transition-colors"
+                      className="w-full md:w-auto px-7 py-3 bg-[#1b6bf9] hover:bg-[#1354cb] text-white rounded-xl text-sm font-semibold tracking-wide shadow-sm hover:shadow transition-all cursor-pointer"
                       onClick={() => handleInitializeTriage(sessionState.raw_symptoms)}
                     >
                       Initialize Triage Dispatch
@@ -582,27 +587,27 @@ export default function App() {
               {/* STEP 2: DEPARTMENT SELECTION SCREEN */}
               {step === 2 && (
                 <div className="space-y-6">
-                  <div className="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <h1 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white">
+                  <div className="space-y-1.5 border-b border-slate-100 pb-5">
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                       Department Dispatch Routing
                     </h1>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-600">
                       The Triage Agent routed the case to the following department suggestions. Verify and select the routing destination.
                     </p>
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                         RAG System Recommendations
                       </span>
                       {sessionState.trace_logs?.initialize && (
                         <button
                           type="button"
                           onClick={() => openTraceDrawer("initialize")}
-                          className="px-2.5 py-1 text-3xs font-mono uppercase tracking-wider border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#edf4ff] text-[#1b6bf9] border border-[#1b6bf9]/30 hover:bg-[#1b6bf9] hover:text-white transition-all cursor-pointer shadow-3xs inline-flex items-center gap-1.5"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-teal-500 inline-block animate-pulse" />
+                          <span className="h-2 w-2 rounded-full bg-[#1b6bf9] inline-block animate-pulse" />
                           View Triage Trace
                         </button>
                       )}
@@ -612,22 +617,22 @@ export default function App() {
                         <button
                           key={dept}
                           type="button"
-                          className={`p-4 border text-left rounded transition-all ${
+                          className={`p-5 border text-left rounded-xl transition-all cursor-pointer ${
                             sessionState.selected_department === dept
-                              ? 'border-teal-500 bg-teal-500/5 dark:bg-teal-500/10 shadow-sm'
-                              : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                              ? 'border-2 border-[#1b6bf9] bg-[#edf4ff] shadow-xs'
+                              : 'border border-slate-200 hover:border-slate-300 bg-white'
                           }`}
                           onClick={() => setSessionState({ ...sessionState, selected_department: dept })}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-mono tracking-wider text-slate-400 uppercase">
+                            <span className="text-xs font-semibold tracking-wider text-[#1b6bf9] uppercase">
                               Recommendation {idx === 0 ? "Primary" : "Secondary"}
                             </span>
                             {sessionState.selected_department === dept && (
-                              <span className="w-2 h-2 rounded-full bg-teal-500" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#1b6bf9]" />
                             )}
                           </div>
-                          <span className="text-lg font-medium text-slate-900 dark:text-white block mt-2">
+                          <span className="text-lg font-bold text-slate-900 block mt-2">
                             {dept}
                           </span>
                         </button>
@@ -635,13 +640,13 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
-                    <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">
+                  <div className="space-y-3 border-t border-slate-100 pt-5">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
                       Deviate and Dispatch Manually
                     </span>
                     <div className="flex gap-2">
                       <select
-                        className="flex-1 border border-slate-200 dark:border-slate-800 rounded bg-slate-50 dark:bg-slate-950 p-2.5 text-xs font-mono focus:outline-none"
+                        className="flex-1 border border-slate-200 rounded-xl bg-slate-50 p-3 text-sm focus:outline-none focus:border-[#1b6bf9] focus:bg-white"
                         value={sessionState.selected_department || ""}
                         onChange={(e) => setSessionState({ ...sessionState, selected_department: e.target.value })}
                       >
@@ -655,17 +660,17 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="pt-4 flex justify-between gap-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="pt-4 flex justify-between gap-4 border-t border-slate-100">
                     <button
                       type="button"
-                      className="px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-600 dark:text-slate-400 rounded text-xs font-mono uppercase tracking-widest transition-colors"
+                      className="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-all cursor-pointer"
                       onClick={() => setStep(1)}
                     >
                       Back to Intake
                     </button>
                     <button
                       type="button"
-                      className="px-6 py-2.5 bg-teal-600 dark:bg-teal-500 text-white rounded text-xs font-mono uppercase tracking-widest hover:bg-teal-700 dark:hover:bg-teal-600 transition-colors"
+                      className="px-7 py-3 bg-[#1b6bf9] hover:bg-[#1354cb] text-white rounded-xl text-sm font-semibold tracking-wide shadow-sm hover:shadow transition-all cursor-pointer"
                       onClick={() => handleProposePlan(sessionState.selected_department || "")}
                     >
                       Propose Treatment Plan
@@ -677,42 +682,42 @@ export default function App() {
               {/* STEP 3: PROCEDURES & INSURANCE FORM */}
               {step === 3 && (
                 <div className="space-y-6">
-                  <div className="space-y-2 border-b border-slate-100 dark:border-slate-800 pb-4">
-                    <h1 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white">
+                  <div className="space-y-1.5 border-b border-slate-100 pb-5">
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                       Plan Confirmation & Coverage
                     </h1>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-600">
                       Verify procedure recommendations proposed by the Medical Planner Agent and input insurance details for cost calculations.
                     </p>
                   </div>
 
                   <div className="space-y-3">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
                         Proposed Clinical Procedures
                       </span>
                       {sessionState.trace_logs?.["propose-plan"] && (
                         <button
                           type="button"
                           onClick={() => openTraceDrawer("propose-plan")}
-                          className="px-2.5 py-1 text-3xs font-mono uppercase tracking-wider border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#edf4ff] text-[#1b6bf9] border border-[#1b6bf9]/30 hover:bg-[#1b6bf9] hover:text-white transition-all cursor-pointer shadow-3xs inline-flex items-center gap-1.5"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-teal-500 inline-block animate-pulse" />
+                          <span className="h-2 w-2 rounded-full bg-[#1b6bf9] inline-block animate-pulse" />
                           View Planner Trace
                         </button>
                       )}
                     </div>
-                    <div className="border border-slate-200 dark:border-slate-800 rounded divide-y divide-slate-200 dark:divide-slate-800">
+                    <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
                       {sessionState.proposed_procedures.map((proc) => {
                         const isChecked = sessionState.confirmed_procedures.includes(proc);
                         return (
                           <label
                             key={proc}
-                            className="flex items-center gap-3 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-950/50 cursor-pointer select-none"
+                            className="flex items-center gap-3.5 p-4 hover:bg-[#edf4ff]/30 cursor-pointer select-none transition-colors"
                           >
                             <input
                               type="checkbox"
-                              className="w-4 h-4 accent-teal-500 rounded border-slate-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0"
+                              className="w-4 h-4 accent-[#1b6bf9] rounded border-slate-300 focus:ring-[#1b6bf9] focus:ring-offset-0"
                               checked={isChecked}
                               onChange={() => {
                                 if (isChecked) {
@@ -728,7 +733,7 @@ export default function App() {
                                 }
                               }}
                             />
-                            <span className="text-sm text-slate-800 dark:text-slate-200 font-sans font-medium">
+                            <span className="text-sm text-slate-800 font-medium">
                               {proc}
                             </span>
                           </label>
@@ -737,17 +742,17 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="space-y-4 border-t border-slate-100 dark:border-slate-800 pt-4">
-                    <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">
+                  <div className="space-y-4 border-t border-slate-100 pt-5">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block">
                       Insurance Policy Details
                     </span>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="text-2xs font-mono uppercase tracking-wider text-slate-400">
+                        <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500">
                           Insurance Provider
                         </label>
                         <select
-                          className="w-full border border-slate-200 dark:border-slate-800 rounded bg-slate-50 dark:bg-slate-950 p-2.5 text-xs font-mono focus:outline-none"
+                          className="w-full border border-slate-200 rounded-xl bg-slate-50 p-3 text-xs font-mono focus:outline-none focus:border-[#1b6bf9] focus:bg-white"
                           value={insuranceProvider}
                           onChange={(e) => setInsuranceProvider(e.target.value)}
                         >
@@ -760,12 +765,12 @@ export default function App() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-2xs font-mono uppercase tracking-wider text-slate-400">
+                        <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500">
                           Policy Identifier Number
                         </label>
                         <input
                           type="text"
-                          className="w-full border border-slate-200 dark:border-slate-800 rounded bg-slate-50 dark:bg-slate-950 p-2 text-xs font-mono focus:outline-none placeholder-slate-400 focus:bg-white dark:focus:bg-slate-950"
+                          className="w-full border border-slate-200 rounded-xl bg-slate-50 p-3 text-xs font-mono focus:outline-none placeholder-slate-400 focus:border-[#1b6bf9] focus:bg-white"
                           placeholder="e.g. BC-98765-AX"
                           value={insurancePolicyId}
                           onChange={(e) => setInsurancePolicyId(e.target.value)}
@@ -775,17 +780,17 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="pt-4 flex justify-between gap-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="pt-4 flex justify-between gap-4 border-t border-slate-100">
                     <button
                       type="button"
-                      className="px-4 py-2 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-600 dark:text-slate-400 rounded text-xs font-mono uppercase tracking-widest transition-colors"
+                      className="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-all cursor-pointer"
                       onClick={() => setStep(2)}
                     >
                       Back to Routing
                     </button>
                     <button
                       type="button"
-                      className="px-6 py-2.5 bg-teal-600 dark:bg-teal-500 text-white rounded text-xs font-mono uppercase tracking-widest hover:bg-teal-700 dark:hover:bg-teal-600 transition-colors"
+                      className="px-7 py-3 bg-[#1b6bf9] hover:bg-[#1354cb] text-white rounded-xl text-sm font-semibold tracking-wide shadow-sm hover:shadow transition-all cursor-pointer"
                       onClick={() => handleFinalizeEstimate(sessionState.confirmed_procedures)}
                     >
                       Calculate Out-of-Pocket
@@ -798,29 +803,29 @@ export default function App() {
               {step === 4 && (
                 <div className="space-y-6">
                   {/* Premium Clinical Receipt */}
-                  <div className="border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 p-6 rounded-md space-y-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 left-0 h-1 bg-teal-500" />
+                  <div className="border border-slate-200 bg-[#faf8f5] p-7 rounded-2xl space-y-6 relative overflow-hidden shadow-xs">
+                    <div className="absolute top-0 right-0 left-0 h-1.5 bg-[#1b6bf9]" />
                     
                     {/* Invoice Header */}
-                    <div className="flex justify-between items-start flex-wrap gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div className="flex justify-between items-start flex-wrap gap-4 border-b border-slate-200 pb-4">
                       <div>
-                        <h2 className="text-md font-mono font-bold tracking-wider text-slate-950 dark:text-white uppercase">
+                        <h2 className="text-lg font-bold tracking-tight text-[#1b6bf9] uppercase">
                           St. Jude Health System
                         </h2>
-                        <p className="text-2xs font-mono text-slate-400 uppercase tracking-widest mt-1">
+                        <p className="text-2xs font-semibold text-slate-500 uppercase tracking-widest mt-1">
                           Preliminary Out-of-Pocket Cost Sheet
                         </p>
                       </div>
                       <div className="text-left md:text-right font-mono flex flex-col items-start md:items-end">
                         <span className="text-2xs text-slate-400 uppercase block">Case Identifier</span>
-                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{sessionState.patient_id}</span>
+                        <span className="text-xs font-bold text-slate-900">{sessionState.patient_id}</span>
                         {sessionState.trace_logs?.["finalize-estimate"] && (
                           <button
                             type="button"
                             onClick={() => openTraceDrawer("finalize-estimate")}
-                            className="mt-2 px-2 py-0.5 text-3xs font-mono uppercase tracking-wider border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-900 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                            className="mt-2 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#edf4ff] text-[#1b6bf9] border border-[#1b6bf9]/30 hover:bg-[#1b6bf9] hover:text-white transition-all cursor-pointer shadow-3xs inline-flex items-center gap-1.5"
                           >
-                            <span className="h-1.5 w-1.5 rounded-full bg-teal-500 inline-block animate-pulse" />
+                            <span className="h-2 w-2 rounded-full bg-[#1b6bf9] inline-block animate-pulse" />
                             View Financial Trace
                           </button>
                         )}
@@ -828,37 +833,37 @@ export default function App() {
                     </div>
 
                     {/* Metadata Specs Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono border-b border-slate-200 dark:border-slate-800 pb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono border-b border-slate-200 pb-4">
                       <div>
                         <span className="text-2xs text-slate-400 uppercase block">Dispatch Dept</span>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">{sessionState.selected_department}</span>
+                        <span className="font-semibold text-slate-900">{sessionState.selected_department}</span>
                       </div>
                       <div>
                         <span className="text-2xs text-slate-400 uppercase block">Insurance</span>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">{sessionState.final_billing_payload?.insurance_provider}</span>
+                        <span className="font-semibold text-slate-900">{sessionState.final_billing_payload?.insurance_provider}</span>
                       </div>
                       <div className="col-span-2">
                         <span className="text-2xs text-slate-400 uppercase block">Policy reference</span>
-                        <span className="font-medium text-slate-800 dark:text-slate-200">{sessionState.final_billing_payload?.insurance_policy_id}</span>
+                        <span className="font-semibold text-slate-900">{sessionState.final_billing_payload?.insurance_policy_id}</span>
                       </div>
                     </div>
 
                     {/* Invoice Table */}
                     <div className="space-y-2">
-                      <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                      <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
                         Itemized Transaction Audit
                       </span>
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs font-mono">
                           <thead>
-                            <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase text-2xs">
+                            <tr className="border-b border-slate-200 text-slate-500 uppercase text-2xs">
                               <th className="py-2">Procedure / Code</th>
                               <th className="py-2 text-right">Standard Rate</th>
                               <th className="py-2 text-right">Co-Pay / Cover</th>
                               <th className="py-2 text-right">Out-of-Pocket</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
+                          <tbody className="divide-y divide-slate-200">
                             {sessionState.final_billing_payload?.confirmed_services.map((svc) => {
                               const gross = sessionState.cost_estimation_breakdown[`${svc.procedure_name} (Gross)`] || 0;
                               const covered = sessionState.cost_estimation_breakdown[`${svc.procedure_name} (Insured Covers)`] || 0;
@@ -866,12 +871,12 @@ export default function App() {
                               return (
                                 <tr key={svc.service_code}>
                                   <td className="py-3 pr-2">
-                                    <span className="font-medium text-slate-800 dark:text-slate-200 block">{svc.procedure_name}</span>
-                                    <span className="text-2xs text-slate-400 uppercase">{svc.service_code}</span>
+                                    <span className="font-semibold text-slate-900 block">{svc.procedure_name}</span>
+                                    <span className="text-2xs text-slate-500 uppercase">{svc.service_code}</span>
                                   </td>
-                                  <td className="py-3 text-right text-slate-600 dark:text-slate-400">${gross.toFixed(2)}</td>
-                                  <td className="py-3 text-right text-teal-600 dark:text-teal-400">-${covered.toFixed(2)}</td>
-                                  <td className="py-3 text-right font-medium text-slate-800 dark:text-slate-200">${oop.toFixed(2)}</td>
+                                  <td className="py-3 text-right text-slate-600">${gross.toFixed(2)}</td>
+                                  <td className="py-3 text-right text-[#1b6bf9] font-medium">-${covered.toFixed(2)}</td>
+                                  <td className="py-3 text-right font-bold text-slate-900">${oop.toFixed(2)}</td>
                                 </tr>
                               );
                             })}
@@ -881,15 +886,15 @@ export default function App() {
                     </div>
 
                     {/* Cost Summary Box */}
-                    <div className="border-t border-slate-200 dark:border-slate-800 pt-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                      <div className="text-2xs text-slate-400 max-w-sm font-sans">
+                    <div className="border-t border-slate-200 pt-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                      <div className="text-2xs text-slate-500 max-w-sm font-sans">
                         Audit Calculations finalized by Financial Estimator Agent. The estimates reflect contract agreements active under your selected policy terms.
                       </div>
-                      <div className="text-left md:text-right font-mono bg-teal-500/10 dark:bg-teal-500/5 p-4 rounded border border-teal-500/20 w-full md:w-auto">
-                        <span className="text-2xs text-teal-600 dark:text-teal-400 uppercase block tracking-wider font-bold">
+                      <div className="text-left md:text-right font-mono bg-[#edf4ff] p-5 rounded-xl border border-[#1b6bf9]/30 w-full md:w-auto">
+                        <span className="text-2xs text-[#1b6bf9] uppercase block tracking-wider font-bold">
                           Final Cost Responsibility
                         </span>
-                        <span className="text-2xl font-bold text-teal-700 dark:text-teal-400 block mt-1">
+                        <span className="text-3xl font-extrabold text-[#1b6bf9] block mt-1">
                           ${sessionState.final_out_of_pocket_cost.toFixed(2)}
                         </span>
                       </div>
@@ -899,7 +904,7 @@ export default function App() {
                   <div className="pt-4 flex justify-end">
                     <button
                       type="button"
-                      className="w-full md:w-auto px-6 py-2.5 bg-teal-600 dark:bg-teal-500 text-white rounded text-xs font-mono uppercase tracking-widest hover:bg-teal-700 dark:hover:bg-teal-600 transition-colors"
+                      className="w-full md:w-auto px-7 py-3 bg-[#1b6bf9] hover:bg-[#1354cb] text-white rounded-xl text-sm font-semibold tracking-wide shadow-sm hover:shadow transition-all cursor-pointer"
                       onClick={handleReset}
                     >
                       New Triage Session
@@ -913,10 +918,10 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-900/50 py-6 text-center">
-        <div className="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-slate-400">
+      <footer className="border-t border-[#e5e3de] bg-white py-6 text-center">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-slate-500">
           <span>&copy; 2026 St. Jude Healthcare Network. All Rights Reserved.</span>
-          <span className="uppercase tracking-widest text-slate-500">Security Clearance Level 1</span>
+          <span className="uppercase tracking-widest text-slate-500 font-semibold">TMA Virtual Assistant Clinical Suite</span>
         </div>
       </footer>
       {renderTraceDrawer()}
