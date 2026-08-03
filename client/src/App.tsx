@@ -31,7 +31,12 @@ interface PatientSessionState {
   final_billing_payload: FEABillingPayload | null;
   cost_estimation_breakdown: Record<string, number>;
   final_out_of_pocket_cost: number;
+  trace_logs?: Record<string, string[]>;
+  ai_model_name?: string | null;
+  prompt_tokens?: number;
+  candidate_tokens?: number;
 }
+
 
 // Preset symptom descriptions for easy user testing
 const PRESET_SYMPTOMS = [
@@ -81,11 +86,27 @@ export default function App() {
     final_billing_payload: null,
     cost_estimation_breakdown: {},
     final_out_of_pocket_cost: 0,
+    trace_logs: {},
+    ai_model_name: null,
+    prompt_tokens: 0,
+    candidate_tokens: 0,
   });
 
   // Local form states
   const [insuranceProvider, setInsuranceProvider] = useState<string>("BlueCross");
   const [insurancePolicyId, setInsurancePolicyId] = useState<string>("");
+
+  // Trace drawer states
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+  const [drawerTab, setDrawerTab] = useState<"initialize" | "propose-plan" | "finalize-estimate">("initialize");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const openTraceDrawer = (tab: "initialize" | "propose-plan" | "finalize-estimate") => {
+    setDrawerTab(tab);
+    setDrawerOpen(true);
+    setSearchQuery("");
+  };
+
 
   // ==========================================
   // API SERVICE HANDLERS
@@ -220,6 +241,10 @@ export default function App() {
       final_billing_payload: null,
       cost_estimation_breakdown: {},
       final_out_of_pocket_cost: 0,
+      trace_logs: {},
+      ai_model_name: null,
+      prompt_tokens: 0,
+      candidate_tokens: 0,
     });
     setInsurancePolicyId("");
     setError(null);
@@ -269,6 +294,160 @@ export default function App() {
     );
   };
 
+  // Helper to render trace drawer
+  const renderTraceDrawer = () => {
+    if (!drawerOpen) return null;
+
+    const availableTabs = [
+      { id: "initialize", label: "Triage Routing" },
+      { id: "propose-plan", label: "Clinical Proposal" },
+      { id: "finalize-estimate", label: "Financial Estimate" }
+    ] as const;
+
+    const logs = sessionState.trace_logs?.[drawerTab] || [];
+    
+    // Filter logs based on search
+    const filteredLogs = logs.filter(line => 
+      line.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Color prefixes based on standard labels
+    const formatLogLine = (line: string) => {
+      const parts = line.match(/^(\[[^\]]+\])(.*)$/);
+      if (!parts) return <span>{line}</span>;
+      
+      const tag = parts[1];
+      const content = parts[2];
+      
+      let tagClass = "text-slate-400 font-bold";
+      if (tag.includes("RAGTool")) {
+        tagClass = "text-amber-400 font-bold font-mono";
+      } else if (tag.includes("TriageAgent")) {
+        tagClass = "text-teal-400 font-bold font-mono";
+      } else if (tag.includes("ClinicalPackagesTool")) {
+        tagClass = "text-emerald-400 font-bold font-mono";
+      } else if (tag.includes("FinancialEstimatorAgent") || tag.includes("FEA")) {
+        tagClass = "text-violet-400 font-bold font-mono";
+      } else if (tag.includes("FinanceDatabaseTool")) {
+        tagClass = "text-fuchsia-400 font-bold font-mono";
+      } else if (tag.includes("MedicalPlannerAgent")) {
+        tagClass = "text-cyan-400 font-bold font-mono";
+      } else if (tag.includes("System")) {
+        tagClass = "text-slate-200 font-bold font-mono";
+      } else if (tag.includes("Error")) {
+        tagClass = "text-rose-500 font-bold font-mono";
+      }
+      
+      return (
+        <span className="font-mono text-xs leading-relaxed block break-all whitespace-pre-wrap">
+          <span className={tagClass}>{tag}</span>
+          <span className="text-slate-300">{content}</span>
+        </span>
+      );
+    };
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-hidden flex justify-end font-sans">
+        {/* Backdrop overlay */}
+        <div 
+          className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
+          onClick={() => setDrawerOpen(false)}
+        />
+        
+        {/* Drawer container */}
+        <div className="relative w-full max-w-xl bg-slate-900 border-l border-slate-800 shadow-2xl h-full flex flex-col z-10 animate-fade-in">
+          {/* Header */}
+          <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+            <div>
+              <h3 className="text-sm font-mono tracking-widest font-bold text-teal-400 uppercase">
+                SYSTEM_TRACE_EXPLORER
+              </h3>
+              <p className="text-3xs font-mono text-slate-500 uppercase tracking-widest mt-0.5">
+                Session Reference: {sessionState.patient_id}
+              </p>
+            </div>
+            <button 
+              onClick={() => setDrawerOpen(false)}
+              className="px-2 py-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded font-mono text-2xs border border-slate-800 transition-colors cursor-pointer"
+            >
+              [ESC] CLOSE
+            </button>
+          </div>
+
+          {/* Drawer Tabs */}
+          <div className="flex bg-slate-950 border-b border-slate-800 px-3">
+            {availableTabs.map(t => {
+              const hasLogs = !!sessionState.trace_logs?.[t.id];
+              return (
+                <button
+                  key={t.id}
+                  disabled={!hasLogs}
+                  onClick={() => setDrawerTab(t.id)}
+                  className={`px-4 py-3 text-2xs font-mono uppercase tracking-widest border-b-2 transition-all font-semibold ${
+                    drawerTab === t.id
+                      ? "border-teal-500 text-teal-400 bg-slate-900"
+                      : hasLogs
+                        ? "border-transparent text-slate-400 hover:text-slate-200 cursor-pointer"
+                        : "border-transparent text-slate-700 cursor-not-allowed"
+                  }`}
+                >
+                  {t.label}
+                  {!hasLogs && <span className="text-3xs text-slate-800 ml-1">(LOCKED)</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Log Controls */}
+          <div className="p-3 bg-slate-900/50 border-b border-slate-800/60 flex gap-2">
+            <input
+              type="text"
+              placeholder="Search trace filters..."
+              className="flex-1 bg-slate-950 text-slate-200 border border-slate-800 rounded px-3 py-1.5 text-xs font-mono placeholder-slate-600 focus:outline-none focus:border-teal-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button
+              onClick={() => {
+                const text = logs.join("\n");
+                navigator.clipboard.writeText(text);
+                alert("Trace logs copied to clipboard!");
+              }}
+              className="px-3 py-1.5 bg-slate-950 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700 rounded text-xs font-mono transition-colors cursor-pointer"
+            >
+              COPY_ALL
+            </button>
+          </div>
+
+          {/* Logs Console Pane */}
+          <div className="flex-1 p-5 bg-slate-950 overflow-y-auto space-y-2 select-text font-mono">
+            {filteredLogs.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-slate-600 font-mono text-xs">
+                {logs.length === 0 ? (
+                  <span>NO LOG ENTRIES RECORDED FOR THIS STAGE</span>
+                ) : (
+                  <span>NO LOGS MATCHING SEARCH QUERY</span>
+                )}
+              </div>
+            ) : (
+              filteredLogs.map((line, idx) => (
+                <div key={idx} className="hover:bg-slate-900/40 py-0.5 px-1 rounded transition-colors">
+                  {formatLogLine(line)}
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Footer Status */}
+          <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-3xs font-mono text-slate-600 tracking-wider">
+            <span>SECURE CLEARANCE LEVEL 1</span>
+            <span>SYSTEM CONSOLE v1.0.0</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans antialiased">
       {/* Header Banner */}
@@ -278,14 +457,30 @@ export default function App() {
             <span className="text-sm font-mono tracking-widest text-teal-600 dark:text-teal-400 font-bold">ST. JUDE CLINICS</span>
             <span className="text-xs font-mono text-slate-400 tracking-wider">TRIAGE DISPATCH SYSTEM</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-            </span>
-            <span className="text-2xs font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
-              Agent Pipeline Active
-            </span>
+          <div className="flex items-center gap-4">
+            {sessionState.trace_logs && Object.keys(sessionState.trace_logs).length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const keys = Object.keys(sessionState.trace_logs || {});
+                  if (keys.includes("finalize-estimate")) openTraceDrawer("finalize-estimate");
+                  else if (keys.includes("propose-plan")) openTraceDrawer("propose-plan");
+                  else openTraceDrawer("initialize");
+                }}
+                className="px-2.5 py-1 text-3xs font-mono tracking-wider border border-slate-200 dark:border-slate-800 hover:border-teal-500/50 rounded bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-all cursor-pointer font-semibold uppercase shadow-3xs"
+              >
+                [ Trace Logs ]
+              </button>
+            )}
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+              </span>
+              <span className="text-2xs font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
+                Agent Pipeline Active
+              </span>
+            </div>
           </div>
         </div>
       </header>
@@ -397,9 +592,21 @@ export default function App() {
                   </div>
 
                   <div className="space-y-3">
-                    <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
-                      RAG System Recommendations
-                    </span>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                        RAG System Recommendations
+                      </span>
+                      {sessionState.trace_logs?.initialize && (
+                        <button
+                          type="button"
+                          onClick={() => openTraceDrawer("initialize")}
+                          className="px-2.5 py-1 text-3xs font-mono uppercase tracking-wider border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-teal-500 inline-block animate-pulse" />
+                          View Triage Trace
+                        </button>
+                      )}
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {sessionState.recommended_departments.map((dept, idx) => (
                         <button
@@ -480,9 +687,21 @@ export default function App() {
                   </div>
 
                   <div className="space-y-3">
-                    <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">
-                      Proposed Clinical Procedures
-                    </span>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">
+                        Proposed Clinical Procedures
+                      </span>
+                      {sessionState.trace_logs?.["propose-plan"] && (
+                        <button
+                          type="button"
+                          onClick={() => openTraceDrawer("propose-plan")}
+                          className="px-2.5 py-1 text-3xs font-mono uppercase tracking-wider border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-950 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-teal-500 inline-block animate-pulse" />
+                          View Planner Trace
+                        </button>
+                      )}
+                    </div>
                     <div className="border border-slate-200 dark:border-slate-800 rounded divide-y divide-slate-200 dark:divide-slate-800">
                       {sessionState.proposed_procedures.map((proc) => {
                         const isChecked = sessionState.confirmed_procedures.includes(proc);
@@ -592,9 +811,19 @@ export default function App() {
                           Preliminary Out-of-Pocket Cost Sheet
                         </p>
                       </div>
-                      <div className="text-left md:text-right font-mono">
+                      <div className="text-left md:text-right font-mono flex flex-col items-start md:items-end">
                         <span className="text-2xs text-slate-400 uppercase block">Case Identifier</span>
                         <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{sessionState.patient_id}</span>
+                        {sessionState.trace_logs?.["finalize-estimate"] && (
+                          <button
+                            type="button"
+                            onClick={() => openTraceDrawer("finalize-estimate")}
+                            className="mt-2 px-2 py-0.5 text-3xs font-mono uppercase tracking-wider border border-slate-200 dark:border-slate-800 rounded bg-white dark:bg-slate-900 hover:border-teal-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-teal-500 inline-block animate-pulse" />
+                            View Financial Trace
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -690,6 +919,7 @@ export default function App() {
           <span className="uppercase tracking-widest text-slate-500">Security Clearance Level 1</span>
         </div>
       </footer>
+      {renderTraceDrawer()}
     </div>
   )
 }

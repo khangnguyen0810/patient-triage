@@ -6,11 +6,11 @@ from triage_system.tools.clinical_tool import ClinicalPackagesTool
 def test_medical_planner_successfully_fetch_packages():
     initial_state = PatientSessionState(
         patient_id="PT-2026",
-        raw_symptoms=["I have sharp chest pain and my heart is beating fast"],
+        raw_symptoms="I have sharp chest pain and my heart is beating fast",
         selected_department="Cardiology",
     )  # type: ignore
 
-    clinical_tool = ClinicalPackagesTool(state=initial_state)
+    clinical_tool = ClinicalPackagesTool()
     medical_planner = MedicalPlannerAgent(clinical_tool=clinical_tool)
     updated_state = medical_planner.propose_medical_plan(initial_state)
     assert len(updated_state.proposed_procedures) == 3
@@ -31,20 +31,23 @@ def test_mpa_transforms_billing_payload_deterministically():
     # Arrange
     initial_state = PatientSessionState(
         patient_id="PT-2026-X",
-        raw_symptoms=[
-            "I have persistent stomach pain, severe cramps, and I feel nauseous after eating."
-        ],  # type: ignore
+        raw_symptoms="I have persistent stomach pain, severe cramps, and I feel nauseous after eating.",
     )
-    tool = ClinicalPackagesTool(state=initial_state)
+    tool = ClinicalPackagesTool()
     agent = MedicalPlannerAgent(clinical_tool=tool)
 
-    state = PatientSessionState(patient_id="PT-MOCK")  # type: ignore
+    state = PatientSessionState(
+        patient_id="PT-MOCK",
+        raw_symptoms="Mock symptoms",
+    )
     state.selected_department = "Gastroenterology"
     state.confirmed_procedures = ["Abdominal Ultrasound", "Complete Blood Count (CBC)"]
     state.insurance_details = {"provider": "Aetna", "policy_id": "AE-992"}
 
     # Act
-    payload = agent.serialize_billing_payload(state)
+    updated_state = agent.serialize_billing_payload(state)
+    payload = updated_state.final_billing_payload
+    assert payload is not None
 
     # Assert
     assert payload.registered_department == "Gastroenterology"

@@ -74,3 +74,20 @@ class PatientSessionState(BaseModel):
         default=0.0,
         description="The final calculated cost after applying insurance coverage rules.",
     )
+    trace_logs: Dict[str, List[str]] = Field(
+        default_factory=dict,
+        description="Detailed trace logs for each step of the triage and billing pipeline.",
+    )
+    ai_model_name: Optional[str] = Field(
+        None,
+        description="The AI model used for symptom routing.",
+    )
+    prompt_tokens: int = Field(
+        0,
+        description="Accumulated prompt tokens used during agent execution.",
+    )
+    candidate_tokens: int = Field(
+        0,
+        description="Accumulated candidate tokens generated during agent execution.",
+    )
+
