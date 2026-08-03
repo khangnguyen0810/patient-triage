@@ -314,7 +314,13 @@ export default function App() {
     // Color prefixes based on standard labels
     const formatLogLine = (line: string) => {
       const parts = line.match(/^(\[[^\]]+\])(.*)$/);
-      if (!parts) return <span>{line}</span>;
+      if (!parts) {
+        return (
+          <span className="font-mono text-xs leading-relaxed block break-all whitespace-pre-wrap text-slate-300">
+            {line}
+          </span>
+        );
+      }
       
       const tag = parts[1];
       const content = parts[2];
@@ -339,9 +345,9 @@ export default function App() {
       }
       
       return (
-        <span className="font-mono text-xs leading-relaxed block break-all whitespace-pre-wrap">
+        <span className="font-mono text-xs leading-relaxed block break-all whitespace-pre-wrap text-slate-300">
           <span className={tagClass}>{tag}</span>
-          <span className="text-slate-300">{content}</span>
+          <span className="text-slate-200">{content}</span>
         </span>
       );
     };
@@ -420,7 +426,7 @@ export default function App() {
           </div>
 
           {/* Logs Console Pane */}
-          <div className="flex-1 p-5 bg-slate-950 overflow-y-auto space-y-2 select-text font-mono">
+          <div className="flex-1 p-5 bg-slate-950 overflow-y-auto space-y-2 select-text font-mono text-slate-200">
             {filteredLogs.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-slate-500 font-mono text-xs">
                 {logs.length === 0 ? (
