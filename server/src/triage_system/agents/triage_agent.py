@@ -93,9 +93,26 @@ class TriageAgent:
     async def _run_async(
         self, user_id: str, session_id: str, prompt: str, state: PatientSessionState
     ) -> str:
-        await self._session_service.create_session(
-            app_name=APP_NAME, user_id=user_id, session_id=session_id
-        )
+        # Handle ongoing sessions optimally by resetting existing session if present
+        try:
+            existing_session = await self._session_service.get_session(
+                app_name=APP_NAME, user_id=user_id, session_id=session_id
+            )
+            if existing_session:
+                await self._session_service.delete_session(
+                    app_name=APP_NAME, user_id=user_id, session_id=session_id
+                )
+            await self._session_service.create_session(
+                app_name=APP_NAME, user_id=user_id, session_id=session_id
+            )
+        except Exception:
+            # Fallback safe creation if get_session or delete_session fails
+            try:
+                await self._session_service.create_session(
+                    app_name=APP_NAME, user_id=user_id, session_id=session_id
+                )
+            except Exception:
+                pass
         content = types.Content(role="user", parts=[types.Part(text=prompt)])
 
         final_text = None
