@@ -71,7 +71,7 @@ async def propose_plan(state: PatientSessionState):
                 detail="selected_department must be set in the state before this step.",
             )
 
-        updated_state = medical_planner.propose_medical_plan(state)
+        updated_state = await medical_planner.propose_medical_plan(state)
         return updated_state
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

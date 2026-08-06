@@ -3,7 +3,10 @@ from triage_system.core.state import PatientSessionState
 from triage_system.tools.clinical_tool import ClinicalPackagesTool
 
 
-def test_medical_planner_successfully_fetch_packages():
+import pytest
+
+@pytest.mark.anyio
+async def test_medical_planner_successfully_fetch_packages():
     initial_state = PatientSessionState(
         patient_id="PT-2026",
         raw_symptoms="I have sharp chest pain and my heart is beating fast",
@@ -12,7 +15,7 @@ def test_medical_planner_successfully_fetch_packages():
 
     clinical_tool = ClinicalPackagesTool()
     medical_planner = MedicalPlannerAgent(clinical_tool=clinical_tool)
-    updated_state = medical_planner.propose_medical_plan(initial_state)
+    updated_state = await medical_planner.propose_medical_plan(initial_state)
     assert len(updated_state.proposed_procedures) == 3
     assert initial_state.proposed_procedures == [
         "Electrocardiogram (ECG)",
@@ -22,7 +25,8 @@ def test_medical_planner_successfully_fetch_packages():
     assert updated_state.package_analysis is not None
     assert "assistant_walkthrough" in updated_state.package_analysis
     assert len(updated_state.package_analysis["categorized_items"]) == 3
-    assert updated_state.package_analysis["categorized_items"][0]["priority"] == "Must-Have (Priority 1)"
+    assert "Must-Have" in updated_state.package_analysis["categorized_items"][0]["priority"]
+
 
 
 

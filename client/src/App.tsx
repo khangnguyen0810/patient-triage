@@ -16,6 +16,13 @@ interface FEABillingPayload {
   insurance_policy_id: string;
 }
 
+interface ContextualJustification {
+  clinical_rationale?: string;
+  what_it_detects?: string;
+  risk_if_omitted?: string;
+  patient_prep_comfort?: string;
+}
+
 interface PackageCategorizationItem {
   procedure_name: string;
   plain_name: string;
@@ -23,7 +30,7 @@ interface PackageCategorizationItem {
   exclusions_plain: string;
   priority: string;
   priority_level: number;
-  justification: string;
+  justification: ContextualJustification | string;
 }
 
 interface PackageAnalysis {
@@ -871,12 +878,52 @@ export default function App() {
                                         {item.exclusions_plain}
                                       </div>
 
-                                      {/* Contextual Justification Callout */}
-                                      <div className="bg-[#edf4ff] border-l-3 border-[#1b6bf9] p-3 rounded-r-xl text-xs text-slate-700">
-                                        <span className="font-bold text-[#1b6bf9] uppercase tracking-wider text-3xs block mb-0.5">
-                                          Contextual Priority Reasoning
+                                      {/* Comprehensive Contextual Priority Reasoning Breakdown */}
+                                      <div className="bg-[#edf4ff] border-l-4 border-[#1b6bf9] p-4 rounded-r-2xl space-y-3 mt-3">
+                                        <span className="font-bold text-[#1b6bf9] uppercase tracking-wider text-2xs flex items-center gap-1.5">
+                                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                          </svg>
+                                          Comprehensive Contextual Priority Reasoning
                                         </span>
-                                        {item.justification}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700">
+                                          <div className="bg-white/90 p-3 rounded-xl border border-blue-100/90 space-y-1">
+                                            <span className="font-semibold text-[#1b6bf9] block text-2xs uppercase">
+                                              💡 Clinical Rationale & Symptom Match
+                                            </span>
+                                            <p className="text-2xs text-slate-700 leading-relaxed font-sans">
+                                              {typeof item.justification === 'object' ? (item.justification.clinical_rationale || "Targets primary intake symptoms directly.") : item.justification}
+                                            </p>
+                                          </div>
+
+                                          <div className="bg-white/90 p-3 rounded-xl border border-blue-100/90 space-y-1">
+                                            <span className="font-semibold text-emerald-700 block text-2xs uppercase">
+                                              🔬 Diagnostic Scope (What It Detects)
+                                            </span>
+                                            <p className="text-2xs text-slate-700 leading-relaxed font-sans">
+                                              {typeof item.justification === 'object' ? (item.justification.what_it_detects || "Rules out acute organ pathology or inflammatory response.") : "Rules out acute underlying organ pathology or systemic inflammatory markers."}
+                                            </p>
+                                          </div>
+
+                                          <div className="bg-white/90 p-3 rounded-xl border border-blue-100/90 space-y-1">
+                                            <span className="font-semibold text-rose-700 block text-2xs uppercase">
+                                              ⚠️ Impact If Skipped / Omitted
+                                            </span>
+                                            <p className="text-2xs text-slate-700 leading-relaxed font-sans">
+                                              {typeof item.justification === 'object' ? (item.justification.risk_if_omitted || "Omitting this test leaves diagnostic gaps for acute evaluation.") : "Omitting this test creates a diagnostic gap for acute symptom evaluation."}
+                                            </p>
+                                          </div>
+
+                                          <div className="bg-white/90 p-3 rounded-xl border border-blue-100/90 space-y-1">
+                                            <span className="font-semibold text-indigo-700 block text-2xs uppercase">
+                                              📋 Patient Preparation & Comfort
+                                            </span>
+                                            <p className="text-2xs text-slate-700 leading-relaxed font-sans">
+                                              {typeof item.justification === 'object' ? (item.justification.patient_prep_comfort || "Painless clinical test. No special prep required unless specified.") : "Painless diagnostic test. No special preparation required unless instructed."}
+                                            </p>
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
