@@ -11,9 +11,9 @@ DATA_PATH = Path(__file__).parent.parent / "data" / "departments.json"
 
 def seed():
     client = chromadb.CloudClient(
-        api_key=os.environ["CHROMA_API_KEY"],
-        tenant=os.environ["CHROMA_TENANT"],
-        database=os.environ["CHROMA_DATABASE"],
+        api_key=os.environ["CHROMADB_API_KEY"],
+        tenant=os.environ["CHROMADB_TENANT"],
+        database=os.environ["CHROMADB_DATABASE"],
     )
     collection = client.get_or_create_collection(name="hospital_routing")
 

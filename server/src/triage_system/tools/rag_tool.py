@@ -7,9 +7,9 @@ import os
 class DepartmentRAGTool:
     def __init__(self):
         self.client = chromadb.CloudClient(
-            api_key=os.environ["CHROMA_API_KEY"],
-            tenant=os.environ["CHROMA_TENANT"],
-            database=os.environ["CHROMA_DATABASE"],
+            api_key=os.environ["CHROMADB_API_KEY"],
+            tenant=os.environ["CHROMADB_TENANT"],
+            database=os.environ["CHROMADB_DATABASE"],
         )
         self.collection = self.client.get_or_create_collection(name="hospital_routing")
 
