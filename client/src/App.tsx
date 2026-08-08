@@ -88,7 +88,7 @@ const GENERAL_DEPARTMENTS = [
   "Pulmonology"
 ];
 
-const API_BASE = "http://localhost:8000/api/pipeline";
+const API_BASE = `${import.meta.env.VITE_API_BASE_URL}/api/pipeline`;
 
 export default function App() {
   // Wizard flow step: 1 (Intake), 2 (Routing), 3 (Procedures/Insurance), 4 (Receipt)
